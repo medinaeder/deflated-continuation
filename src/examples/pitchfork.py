@@ -27,7 +27,7 @@ class Pitchfork:
         return self.jacobian(u,p)
 
     def initial_guess(self):
-        return np.array(0)
+        return np.array(0.01)
 
     def functional(self,u):
         return u
