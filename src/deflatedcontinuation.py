@@ -30,7 +30,7 @@ class DeflatedContinuation:
             for x in x0:
                 try:
                     if self.has_trivial:
-                        xn = scipy.optimize.newton(self.deflate, x, args = (p,problem.residual,[],), tol = 1e-8)
+                        xn = scipy.optimize.newton(self.deflate, x, args = (p,[],), tol = 1e-8)
                     else:
                         xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = 1e-8)
                     xnew.append(xn)
@@ -42,12 +42,11 @@ class DeflatedContinuation:
             # Branch Discovery Step
             num_sols = len(x0)
             
-
             for i in range(num_sols):
                 discovered = True
                 while discovered:
                     try:
-                        xn = scipy.optimize.newton(self.deflate, x0[i], args = (p,problem.residual,xnew,), tol = 1e-8)
+                        xn = scipy.optimize.newton(self.deflate, x0[i], self.deflate_jacobian, args = (p,xnew,), tol = 1e-8)
                         xnew.append(xn)
                         #print(xnew)
                     except: 
@@ -60,30 +59,31 @@ class DeflatedContinuation:
 
         self.solutions = solutions
     
-    def deflate(self, x, p, f, xstars):
+    def deflate(self, x, p, roots):
+        f = self.problem.residual
         shift = self.shift
         power = self.power
-        #print(x.shape)
-        factor = 1;
-        for xstar in xstars:
-            denom = (np.linalg.norm(x-xstar))**power
-            factor *= 1./denom + shift
+        factor = 1.0
+        for root in roots:
+            d = x - root
+            normsq = np.dot(d,d)
+            factor *= normsq**(-power/2.0) + shift
 
         # deflate the trivial solution
         if self.has_trivial:
-            denom = (np.linalg.norm(x))**power
-            factor *= 1./denom + shift
+            normsq = np.dot(x,x)
+            factor *= normsq**(-power/2.0) + shift
         return factor*f(x,p)
 
-    def deflate_jacobian(self, x, p, f, xstars, shift=1, power=2):
+    def deflate_jacobian(self, x, p, roots):
         shift = self.shift
         power = self.power
         problem = self.problem
+        R = problem.residual(x,p)
         jac = problem.jacobian(x,p)
-        R = f(x,p)
         
         # Adapted from PEF defcon operator deflation
-        if len(xtars) < 1:
+        if len(roots) < 1:
             return jac
 
         factors = []
@@ -91,10 +91,14 @@ class DeflatedContinuation:
         normsqs = [] # norm squared
         dnormsqs = [] # norm squared
 
-        for root in xstars:
+        for root in roots:
             d = x-root
             normsqs.append(np.dot(d,d))
             dnormsqs.append(2*d)
+        
+        if self.has_trivial:
+            normsqs.append(np.dot(x,x))
+            dnormsqs.append(2*x)
 
         for normsq in normsqs:
             factor = normsq**(-power/2.0) + shift
@@ -107,10 +111,6 @@ class DeflatedContinuation:
         deta = np.zeros_like(x)
         for (factor, dfactor, dnormsq) in zip(factors, dfactors, dnormsqs):
             deta+=(eta/factor)*dfactor*dnormsq
-
-        if self.has_trivial:
-            # TODO:add the shift to eta
-            pass 
 
         return eta*jac + np.outer(deta,R)
 
@@ -136,13 +136,15 @@ if __name__ == "__main__":
     from examples.saddle import Saddle
     from examples.transcritical import Transcritical
 
-    problem = Transcritical(1e-2)
+    problem = Transcritical(1e-1)
+    #problem = Transcritical(0)
     params = np.linspace(-1, 2,101)
     df = DeflatedContinuation(problem,params,False)
     df.run()
     df.plot_solutions()
-    
-    problem = Pitchfork(1e-5)
+
+
+    problem = Pitchfork(1e-1)
     params = np.linspace(-1,2,101)
     df = DeflatedContinuation(problem,params,False)
     df.run()
