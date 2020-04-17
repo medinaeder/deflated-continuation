@@ -26,6 +26,7 @@ class DeflatedContinuation:
             # Continuation Step
             for x in x0:
                 try:
+                    #xn = scipy.optimize.newton(self.deflate, x, args = (p,problem.residual,[], tol = 1e-8)
                     xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = 1e-8)
                     xnew.append(xn)
                 except: 
@@ -61,7 +62,14 @@ class DeflatedContinuation:
         for xstar in xstars:
             denom = (np.linalg.norm(x-xstar))**power
             factor *= 1./denom + shift
+
+        # deflate the trivial solution
+        #denom = (np.linalg.norm(x))**power
+        #factor *= 1./denom + shift
         return factor*f(x,p)
+
+    def deflate_jacobian(self, x, p, f, xstars, shift=1, power=2):
+        pass
 
     
     def plot_solutions(self):
@@ -70,7 +78,7 @@ class DeflatedContinuation:
             p = s[0]
             for v in s[1]:
                 stab = self.problem.stability(v,p)
-                plt.scatter(p, v, c = np.sign(stab), vmin = -1, vmax = 1)
+                plt.scatter(p, self.problem.functional(v), c = np.sign(stab), vmin = -1, vmax = 1)
 
 
 if __name__ == "__main__":
