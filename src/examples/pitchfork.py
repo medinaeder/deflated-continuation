@@ -28,6 +28,9 @@ class Pitchfork:
     def initial_guess(self):
         return np.array(0)
 
+    def functional(self,u):
+        return u
+
 if __name__ == "__main__":
     import scipy.optimize
     import matplotlib.pyplot as plt

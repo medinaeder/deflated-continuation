@@ -35,13 +35,11 @@ class Lorenz:
         return np.array([[-sig, sig, 0],[r-z,-1,-x],[y,x,-b]])
 
     def stability(self,u,r):
-        J = self.jac(u,r)
+        J = self.jacobian(u,r)
         e, v = np.linalg.eig(J) 
         # Return the largest eigenvalue of the system
         return max(e)
     
-    def initial_guess(self):
-        return np.zeros(3)
         
     def solve_newton(self):
         rmax = 30.0
@@ -86,6 +84,9 @@ class Lorenz:
             sols.append([ri, x,s]) 
         self.sol = sols
 
+    def initial_guess(self):
+        return np.array([1e-3,1e-3,0])
+
     def objective(self):
         # maximize the number of stable points
         s = []
@@ -95,6 +96,9 @@ class Lorenz:
         #s = np.sign(np.array(s))
         s = np.array(s)
         return -np.sum(np.real(s))
+
+    def functional(self,u):
+        return u[0]
 
         
 

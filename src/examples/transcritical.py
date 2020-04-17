@@ -27,4 +27,6 @@ class Transcritical:
 
     def initial_guess(self):
         return np.array(0)
-
+    
+    def functional(self,u):
+        return u
