@@ -121,12 +121,12 @@ class DeflatedContinuation:
             p = s[0]
             for v in s[1]:
                 stab = self.problem.stability(v,p)
-                plt.scatter(p, self.problem.functional(v), c = np.sign(stab), vmin = -1, vmax = 1)
+                plt.scatter(p, self.problem.functional(v), c = np.sign(stab), vmin = -1, vmax = 1, cmap = "cividis")
 
             if self.has_trivial:
                 x0 = np.zeros(self.problem.dim)
                 stab = self.problem.stability(x0,p)
-                plt.scatter(p, self.problem.functional(x0), c = np.sign(stab), vmin = -1, vmax = 1)
+                plt.scatter(p, self.problem.functional(x0), c = np.sign(stab), vmin = -1, vmax = 1, cmap = "cividis")
 
 
 
