@@ -5,6 +5,7 @@ class Lorenz:
     def __init__(self,sig,b):
         self.sigma = sig 
         self.b = b
+        self.dim = 3
 
     def __call__(self, x):
         self.sigma = x[0]

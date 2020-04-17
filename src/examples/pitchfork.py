@@ -6,6 +6,7 @@ class Pitchfork:
     def __init__(self,delta):
         self.b = 1
         self.d = delta
+        self.dim = 1
 
     def __call__(self,x):
         print("Not Implemented Yet")

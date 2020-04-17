@@ -3,6 +3,8 @@ import numpy as np
 
 
 class Saddle:
+    def __init__(self):
+        self.dim = 1
 
     def __call__(self,x):
         print("Not Implemented Yet")

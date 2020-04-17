@@ -6,9 +6,12 @@ import matplotlib.pyplot as plt
 # Deflate a single solution for now and run the exampples
 
 class DeflatedContinuation:
-    def __init__(self,problem, params):
+    def __init__(self,problem, params, has_trivial = True):
         self.problem = problem
         self.params = params
+        self.has_trivial = has_trivial
+        self.shift = 1
+        self.power = 2
 
     def run(self):
         problem = self.problem
@@ -26,8 +29,10 @@ class DeflatedContinuation:
             # Continuation Step
             for x in x0:
                 try:
-                    #xn = scipy.optimize.newton(self.deflate, x, args = (p,problem.residual,[], tol = 1e-8)
-                    xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = 1e-8)
+                    if self.has_trivial:
+                        xn = scipy.optimize.newton(self.deflate, x, args = (p,problem.residual,[],), tol = 1e-8)
+                    else:
+                        xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = 1e-8)
                     xnew.append(xn)
                 except: 
                     # FixMe to return a ConvergenceError
@@ -55,21 +60,59 @@ class DeflatedContinuation:
 
         self.solutions = solutions
     
-    def deflate(self, x, p, f, xstars, shift=1, power=2):
+    def deflate(self, x, p, f, xstars):
+        shift = self.shift
+        power = self.power
         #print(x.shape)
-        #I = np.identity(x.shape[0])
         factor = 1;
         for xstar in xstars:
             denom = (np.linalg.norm(x-xstar))**power
             factor *= 1./denom + shift
 
         # deflate the trivial solution
-        #denom = (np.linalg.norm(x))**power
-        #factor *= 1./denom + shift
+        if self.has_trivial:
+            denom = (np.linalg.norm(x))**power
+            factor *= 1./denom + shift
         return factor*f(x,p)
 
     def deflate_jacobian(self, x, p, f, xstars, shift=1, power=2):
-        pass
+        shift = self.shift
+        power = self.power
+        problem = self.problem
+        jac = problem.jacobian(x,p)
+        R = f(x,p)
+        
+        # Adapted from PEF defcon operator deflation
+        if len(xtars) < 1:
+            return jac
+
+        factors = []
+        dfactors = []
+        normsqs = [] # norm squared
+        dnormsqs = [] # norm squared
+
+        for root in xstars:
+            d = x-root
+            normsqs.append(np.dot(d,d))
+            dnormsqs.append(2*d)
+
+        for normsq in normsqs:
+            factor = normsq**(-power/2.0) + shift
+            dfactor = (-power/2.0)*normsq**((-power/2.0)-1.0)
+
+            factors.append(factor)
+            dfactors.append(dfactor)
+
+        eta = np.prod(factors)
+        deta = np.zeros_like(x)
+        for (factor, dfactor, dnormsq) in zip(factors, dfactors, dnormsqs):
+            deta+=(eta/factor)*dfactor*dnormsq
+
+        if self.has_trivial:
+            # TODO:add the shift to eta
+            pass 
+
+        return eta*jac + np.outer(deta,R)
 
     
     def plot_solutions(self):
@@ -80,6 +123,13 @@ class DeflatedContinuation:
                 stab = self.problem.stability(v,p)
                 plt.scatter(p, self.problem.functional(v), c = np.sign(stab), vmin = -1, vmax = 1)
 
+            if self.has_trivial:
+                x0 = np.zeros(self.problem.dim)
+                stab = self.problem.stability(x0,p)
+                plt.scatter(p, self.problem.functional(x0), c = np.sign(stab), vmin = -1, vmax = 1)
+
+
+
 
 if __name__ == "__main__":
     from examples.pitchfork import Pitchfork
@@ -88,19 +138,19 @@ if __name__ == "__main__":
 
     problem = Transcritical(1e-2)
     params = np.linspace(-1, 2,101)
-    df = DeflatedContinuation(problem,params)
+    df = DeflatedContinuation(problem,params,False)
     df.run()
     df.plot_solutions()
     
     problem = Pitchfork(1e-5)
     params = np.linspace(-1,2,101)
-    df = DeflatedContinuation(problem,params)
+    df = DeflatedContinuation(problem,params,False)
     df.run()
     df.plot_solutions()
 
     problem = Saddle()
     params = np.linspace(-1,2,101)
-    df = DeflatedContinuation(problem,params)
+    df = DeflatedContinuation(problem,params,False)
     df.run()
     df.plot_solutions()
 
