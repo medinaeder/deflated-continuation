@@ -29,13 +29,15 @@ class DeflatedContinuation:
             xnew = []
             # Continuation Step
             for x in x0:
-                try:
-                    if self.has_trivial:
-                        xn = scipy.optimize.newton(self.deflate, x, args = (p,[],), tol = self.tol)
-                    else:
-                        xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = self.tol)
-                    xnew.append(xn)
-                except: 
+                #try:
+                if self.has_trivial:
+                    xn = scipy.optimize.root(self.deflate, x, args = (p,[],), tol = self.tol)
+                else:
+                    xn = scipy.optimize.root(problem.residual, x,jac = self.problem.jacobian,  args = (p,), tol = self.tol)
+                if xn.success:
+                    print("Here")
+                    xnew.append(xn.x)
+                #except: 
                     # FixMe to return a ConvergenceError
                     #print("Failed to Converge")
                     pass
@@ -46,14 +48,18 @@ class DeflatedContinuation:
             for i in range(num_sols):
                 discovered = True
                 while discovered:
-                    try:
-                        xn = scipy.optimize.newton(self.deflate, x0[i], self.deflate_jacobian, args = (p,xnew,), tol = self.tol)
-                        xnew.append(xn)
+                    #try:
+                    xn = scipy.optimize.root(self.deflate, x0[i], jac = self.deflate_jacobian,  args = (p,xnew,), tol = self.tol)
+                    if xn.success:
+                        print("Here")
+                        xnew.append(xn.x)
+                    else: 
+                        discovered = False
                         #print(xnew)
-                    except: 
+                    #except: 
                         # FIXME: Return Convergence Error
                         #print("Failed to converge")
-                        discovered=False
+                        #discovered=False
             # record solutions for parameter
             prev_sol = xnew
             solutions.append([p,xnew])
@@ -142,25 +148,25 @@ if __name__ == "__main__":
     # I have a hunch as to why this does not work! 
     # I have a feeling it is related to chaos. Can we apply a newton iteration to a choatic problem?
     # Probably not
-    # 
+     
     problem = Lorenz(10, 8./3)
-    params = np.linspace(1.1, 1.3, 200)
+    params = np.linspace(0.9, 30, 500)
+    df = DeflatedContinuation(problem,params,True)
+    df.run()
+    df.plot_solutions()
+    
+
+    problem = Transcritical(0)
+    #problem = Transcritical(0)
+    params = np.linspace(-1, 2,101)
     df = DeflatedContinuation(problem,params,True)
     df.run()
     df.plot_solutions()
 
 
-    problem = Transcritical(1e-1)
-    #problem = Transcritical(0)
-    params = np.linspace(-1, 2,101)
-    df = DeflatedContinuation(problem,params,False)
-    df.run()
-    df.plot_solutions()
-
-
-    problem = Pitchfork(1e-1)
+    problem = Pitchfork(0)
     params = np.linspace(-1,2,101)
-    df = DeflatedContinuation(problem,params,False)
+    df = DeflatedContinuation(problem,params,True)
     df.run()
     df.plot_solutions()
 

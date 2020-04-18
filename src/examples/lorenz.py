@@ -26,7 +26,7 @@ class Lorenz:
         
         return np.array([sig*(y-x), r*x-y-x*z, -b*z+x*y])
     
-    def residual(self,t, u ,r):
+    def residual_time(self,t, u ,r):
         # u is the solution, r is the parameter
         # RHS
         x = u[0]
@@ -101,7 +101,7 @@ class Lorenz:
         b = self.b
         t = np.sqrt(b*(1.1-1))
         x = np.array([-t,-t,1.1-1])
-        return x
+        return np.ones(3)*1e-3
 
     def objective(self):
         # maximize the number of stable points
@@ -148,7 +148,7 @@ if __name__== "__main__":
     from scipy import integrate
     r0 = 1.1
     delta = 1e-3
-    output = integrate.solve_ivp(problem.residual, t_span = (0,10), y0 = problem.initial_guess() ,args = (r0+delta,),  t_eval = np.linspace(0,10,101))
+    output = integrate.solve_ivp(problem.residual_time, t_span = (0,10), y0 = problem.initial_guess() ,args = (r0+delta,),  t_eval = np.linspace(0,10,101))
     y = output.y
     # Visualize this system
     #print(output)
@@ -167,14 +167,14 @@ if __name__== "__main__":
    
     #import sys
     #sys.exit()
-    #sigs = np.linspace(5,25,100)
-    #fit =[]
-    #bs = np.linspace(1,10,100)
-    #for bb in bs:
-    #    fit.append(problem(np.array([10,bb])))
+    sigs = np.linspace(5,25,100)
+    fit =[]
+    bs = np.linspace(1,10,100)
+    for bb in bs:
+        fit.append(problem(np.array([10,bb])))
 
-    #plt.scatter(bs, fit)
-    #plt.show()
+    plt.scatter(bs, fit)
+    plt.show()
 
         
 
