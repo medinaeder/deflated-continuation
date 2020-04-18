@@ -25,6 +25,18 @@ class Lorenz:
         b = self.b
         
         return np.array([sig*(y-x), r*x-y-x*z, -b*z+x*y])
+    
+    def residual(self,t, u ,r):
+        # u is the solution, r is the parameter
+        # RHS
+        x = u[0]
+        y = u[1]
+        z = u[2]
+
+        sig = self.sigma
+        b = self.b
+        
+        return np.array([sig*(y-x), r*x-y-x*z, -b*z+x*y])
 
     def jacobian(self, u, r):
         # Jacobian
@@ -86,7 +98,10 @@ class Lorenz:
         self.sol = sols
 
     def initial_guess(self):
-        return np.array([1e-3,1e-3,0])
+        b = self.b
+        t = np.sqrt(b*(1.1-1))
+        x = np.array([-t,-t,1.1-1])
+        return x
 
     def objective(self):
         # maximize the number of stable points
@@ -105,12 +120,13 @@ class Lorenz:
 
 # First I want to plot the bifurcation diagram
 if __name__== "__main__":
+    import matplotlib.pyplot as plt
     b = 8/3
     s = 10
 
+    # Plot the Bifurcation Diagram of the Lorenz System
     problem = Lorenz(s,b)
     problem.solve_newton()
-    import matplotlib.pyplot as plt
     r =[]
     d =[]
     s =[]
@@ -126,17 +142,39 @@ if __name__== "__main__":
     plt.scatter(r, d[:,1], c = np.sign(s) ,vmin = -1, vmax = 1, cmap = "PiYG_r")
     plt.colorbar()
     plt.show()
-   
-    import sys
-    #sys.exit()
-    sigs = np.linspace(5,25,100)
-    fit =[]
-    bs = np.linspace(1,10,100)
-    for bb in bs:
-        fit.append(problem(np.array([10,bb])))
 
-    plt.scatter(bs, fit)
+    # Simulate the Lorenz System Starting from a random initial position
+    # Choose a number of steps
+    from scipy import integrate
+    r0 = 1.1
+    delta = 1e-3
+    output = integrate.solve_ivp(problem.residual, t_span = (0,10), y0 = problem.initial_guess() ,args = (r0+delta,),  t_eval = np.linspace(0,10,101))
+    y = output.y
+    # Visualize this system
+    #print(output)
+    print(output.t)
+    print(y.shape)
+    plt.plot(output.t, y[0,:])
+    plt.figure()
+    plt.plot(output.t, y[1,:])
+    plt.figure()
+    plt.plot(output.t, y[2,:])
+    plt.figure()
+    plt.plot(y[0,:], y[1,:])
+
     plt.show()
+
+   
+    #import sys
+    #sys.exit()
+    #sigs = np.linspace(5,25,100)
+    #fit =[]
+    #bs = np.linspace(1,10,100)
+    #for bb in bs:
+    #    fit.append(problem(np.array([10,bb])))
+
+    #plt.scatter(bs, fit)
+    #plt.show()
 
         
 

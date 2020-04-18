@@ -12,6 +12,7 @@ class DeflatedContinuation:
         self.has_trivial = has_trivial
         self.shift = 1
         self.power = 2
+        self.tol = 1e-7
 
     def run(self):
         problem = self.problem
@@ -30,9 +31,9 @@ class DeflatedContinuation:
             for x in x0:
                 try:
                     if self.has_trivial:
-                        xn = scipy.optimize.newton(self.deflate, x, args = (p,[],), tol = 1e-8)
+                        xn = scipy.optimize.newton(self.deflate, x, args = (p,[],), tol = self.tol)
                     else:
-                        xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = 1e-8)
+                        xn = scipy.optimize.newton(problem.residual, x, problem.jacobian, args = (p,), tol = self.tol)
                     xnew.append(xn)
                 except: 
                     # FixMe to return a ConvergenceError
@@ -46,7 +47,7 @@ class DeflatedContinuation:
                 discovered = True
                 while discovered:
                     try:
-                        xn = scipy.optimize.newton(self.deflate, x0[i], self.deflate_jacobian, args = (p,xnew,), tol = 1e-8)
+                        xn = scipy.optimize.newton(self.deflate, x0[i], self.deflate_jacobian, args = (p,xnew,), tol = self.tol)
                         xnew.append(xn)
                         #print(xnew)
                     except: 
@@ -135,6 +136,19 @@ if __name__ == "__main__":
     from examples.pitchfork import Pitchfork
     from examples.saddle import Saddle
     from examples.transcritical import Transcritical
+    from examples.lorenz import Lorenz
+
+
+    # I have a hunch as to why this does not work! 
+    # I have a feeling it is related to chaos. Can we apply a newton iteration to a choatic problem?
+    # Probably not
+    # 
+    problem = Lorenz(10, 8./3)
+    params = np.linspace(1.1, 1.3, 200)
+    df = DeflatedContinuation(problem,params,True)
+    df.run()
+    df.plot_solutions()
+
 
     problem = Transcritical(1e-1)
     #problem = Transcritical(0)
