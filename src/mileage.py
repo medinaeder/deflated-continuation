@@ -17,7 +17,8 @@ class MileageObjective(DC):
                     c = float(stab)
                 else:
                     c = np.sign(stab)
-                obj+=c
+                if c<0:
+                    obj+=c
                   
             if self.has_trivial:
                 x0 = np.zeros(self.problem.dim)
@@ -26,7 +27,8 @@ class MileageObjective(DC):
                     c = float(stab)
                 else:
                     c = np.sign(stab)
-                obj+=c
+                if c<0:
+                    obj+=c
 
         return obj
 
