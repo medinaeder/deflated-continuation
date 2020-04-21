@@ -2,9 +2,9 @@ import numpy as np
 import scipy.optimize
 
 class Lorenz:
-    def __init__(self,sig,b):
-        self.sigma = sig 
-        self.b = b
+    def __init__(self,controls):
+        self.sigma = controls[0]
+        self.b = controls[1]
         self.dim = 3
 
     def __call__(self, x):
@@ -101,7 +101,7 @@ class Lorenz:
         b = self.b
         t = np.sqrt(b*(1.1-1))
         x = np.array([-t,-t,1.1-1])
-        return np.ones(3)*1e-3
+        return [np.ones(3)*1e-3]
 
     def objective(self):
         # maximize the number of stable points

@@ -3,9 +3,9 @@ import numpy as np
 
 
 class Transcritical:
-    def __init__(self,delta):
-        self.b = 1
-        self.d = delta
+    def __init__(self,controls):
+        self.b = controls[0]
+        self.d = controls[1]
         self.dim = 1
 
     def __call__(self,x):
@@ -27,7 +27,7 @@ class Transcritical:
         return self.jacobian(u,p)
 
     def initial_guess(self):
-        return np.array(0.01)
+        return [np.array(0.01)]
     
     def functional(self,u):
         return u
