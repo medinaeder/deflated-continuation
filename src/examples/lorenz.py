@@ -7,6 +7,10 @@ class Lorenz:
         self.b = controls[1]
         self.dim = 3
 
+    def set_controls(self, controls):
+        self.sigma = controls[0]
+        self.b = controls[1]
+
     def __call__(self, x):
         self.sigma = x[0]
         self.b = x[1]
@@ -15,8 +19,6 @@ class Lorenz:
         return fitness
 
     def residual(self, u ,r):
-        # u is the solution, r is the parameter
-        # RHS
         x = u[0]
         y = u[1]
         z = u[2]
@@ -27,8 +29,6 @@ class Lorenz:
         return np.array([sig*(y-x), r*x-y-x*z, -b*z+x*y])
     
     def residual_time(self,t, u ,r):
-        # u is the solution, r is the parameter
-        # RHS
         x = u[0]
         y = u[1]
         z = u[2]
@@ -48,77 +48,17 @@ class Lorenz:
         return np.array([[-sig, sig, 0],[r-z,-1,-x],[y,x,-b]])
 
     def stability(self,u,r):
+        # Larget Lyapunov Exponent
         J = self.jacobian(u,r)
         e, v = np.linalg.eig(J) 
-        # Return the largest eigenvalue of the system
         return max(e)
-    
-        
-    def solve_newton(self):
-        rmax = 30.0
-        r = np.linspace(0.0,rmax, 201)
-        sols = []
-        x = np.zeros(3)
-        for i in range(len(r)*0):
-            ri = r[i]
-            try:
-                x = scipy.optimize.newton(self.f, x, args=(ri,),tol=1e-6)
-            except:
-                print("F1", self.b,self.sigma)
-            s = self.stability(x,ri)
-            sols.append([ri, x,s]) 
-
-        b =self.b
-
-        r = np.linspace(1.0,rmax, 201)
-        t = np.sqrt(b*(r[0]-1))
-        x = np.array([t,t,r[0]-1])
-        for i in range(len(r)):
-            ri = r[i]
-            t = np.sqrt(b*(ri-1))
-            x = np.array([t,t,ri-1])
-            try:
-                x = scipy.optimize.newton(self.f, x, args=(ri,),tol=1e-6)
-            except:
-                print("F2", self.b,self.sigma)
-            s = self.stability(x,ri)
-            sols.append([ri, x,s]) 
-
-        r = np.linspace(1.0,rmax, 201)
-        for i in range(len(r)):
-            ri = r[i]
-            t = np.sqrt(b*(ri-1))
-            x = np.array([-t,-t,ri-1])
-            try:
-                x = scipy.optimize.newton(self.f, x, args=(ri,),tol=1e-6)
-            except:
-                print("F3", self.b,self.sigma)
-            s = self.stability(x,ri)
-            sols.append([ri, x,s]) 
-        self.sol = sols
 
     def initial_guess(self):
-        b = self.b
-        t = np.sqrt(b*(1.1-1))
-        x = np.array([-t,-t,1.1-1])
-        return [np.ones(3)*1e-3]
-
-    def objective(self):
-        # maximize the number of stable points
-        s = []
-        for x in self.sol:
-            s.append(x[2])
-
-        #s = np.sign(np.array(s))
-        s = np.array(s)
-        return -np.sum(np.real(s))
+        return [np.ones(3)*1e-3, np.ones(3)*-1e-3]
 
     def functional(self,u):
         return u[0]
 
-        
-
-# First I want to plot the bifurcation diagram
 if __name__== "__main__":
     import matplotlib.pyplot as plt
     b = 8/3

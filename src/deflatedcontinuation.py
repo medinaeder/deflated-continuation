@@ -1,9 +1,6 @@
 import numpy as np
 import scipy.optimize 
-# Add a try to import matplotlib
 import matplotlib.pyplot as plt
-
-# Deflate a single solution for now and run the exampples
 
 class DeflatedContinuation:
     def __init__(self,problem, params, has_trivial = True):
@@ -119,7 +116,7 @@ class DeflatedContinuation:
     
     def plot_solutions(self):
         plt.figure()
-        cont = True
+        cont = False
         for s in self.solutions:
             p = s[0]
             for v in s[1]:
@@ -139,6 +136,7 @@ class DeflatedContinuation:
                     c = np.sign(stab)
                 plt.scatter(p, self.problem.functional(x0), c = c, vmin = -1, vmax = 1, cmap = "cividis")
 
+
 def run_perturbed(pert):
     from examples.pitchfork import Pitchfork
     from examples.saddle import Saddle
@@ -147,7 +145,7 @@ def run_perturbed(pert):
 
 
     problem = Lorenz([10, 8./3])
-    params = np.linspace(0.1, 30, 101)
+    params = np.linspace(0.1, 30, 201)
     df = DeflatedContinuation(problem,params,True)
     df.run()
     df.plot_solutions()
@@ -210,15 +208,8 @@ def run_perfect():
     plt.show()
     return
 
-    
-
-
-
-
 if __name__ == "__main__":
-    #run_perfect()
-    run_perturbed(1e-2)
-    
-
+    run_perfect()
+    #run_perturbed(1e-1)
 
 

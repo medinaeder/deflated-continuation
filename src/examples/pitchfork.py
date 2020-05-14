@@ -8,6 +8,10 @@ class Pitchfork:
         self.d = controls[1]
         self.dim = 1
 
+    def set_controls(self, controls):
+        self.b = controls[0]
+        self.d = controls[1]
+
     def __call__(self,x):
         print("Not Implemented Yet")
 
