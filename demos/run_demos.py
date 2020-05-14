@@ -1,4 +1,6 @@
+import numpy as np
 from deflatedcontinuation import DeflatedContinuation
+import matplotlib.pyplot as plt
 
 def run_perturbed(pert):
     from pitchfork import Pitchfork

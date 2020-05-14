@@ -5,10 +5,10 @@ from bifcma import CMAES
 
 
 # Import the Lorenz System
-from examples.lorenz import Lorenz
+from demos.lorenz import Lorenz
 
 # Import the mileage objective
-from mileage import MileageObjective
+from deflatedcontinuation.mileage import MileageObjective
 
 
 

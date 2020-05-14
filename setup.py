@@ -1,6 +1,6 @@
 from setuptools import setup
     
-setup(name = "Deflated Continuation- Adapted",
+setup(name = "deflatedcontinuation",
       version='0.0.1',
       description='A non-firedrake adapation of deflated continuation',
       url='github?',
