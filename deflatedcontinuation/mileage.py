@@ -7,6 +7,7 @@ class MileageObjective(DC):
         self.dimension = len(controls)
 
     def objective(self,controls):
+        # Ahmad idea use tanh
         self.problem.set_controls(controls)
         cont = False
         self.run()
