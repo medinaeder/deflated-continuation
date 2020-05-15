@@ -3,13 +3,13 @@ import scipy.optimize
 import matplotlib.pyplot as plt
 
 class DeflatedContinuation:
-    def __init__(self,problem, params, has_trivial = True):
+    def __init__(self,problem, params, has_trivial = True, tol = 1e-6):
         self.problem = problem
         self.params = params
         self.has_trivial = has_trivial
         self.shift = 1
         self.power = 2
-        self.tol = 1e-5
+        self.tol = tol
 
     def run(self):
         problem = self.problem
