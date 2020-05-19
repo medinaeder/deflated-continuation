@@ -46,9 +46,12 @@ def run_perfect():
     
     problem = Lorenz([10, 8./3])
     params = np.linspace(0.1, 30, 101)
-    df = DeflatedContinuation(problem,params,True)
+    df = DeflatedContinuation(problem,params,True, 1e-4)
     df.run()
-    df.plot_solutions()
+    print("refining")
+    df.refine()
+    import IPython; IPython.embed()
+    df.plot_solutions(True)
     
 
     problem = Transcritical([1.,0])

@@ -113,11 +113,32 @@ class DeflatedContinuation:
 
         return eta*jac + np.outer(R,deta)
 
-    
-    def plot_solutions(self):
-        plt.figure()
-        cont = False
+    def refine(self):
+        # The idea is that we solve with a large tolerance
+        # and then we refine the deflated solutions
+        # Iterate through our solutions and use those as the initial guess to our problem
+        refined_solutions = []
+  
         for s in self.solutions:
+            p = s[0] 
+            new_set = []
+            for x in s[1]:
+                xn = scipy.optimize.root(self.problem.residual, x, jac = self.problem.jacobian,  args = (p,), tol =
+self.tol*1e-2)
+                if xn.success:
+                    new_set.append(xn.x)
+            refined_solutions.append([p,new_set])
+        self.refined_solutions = refined_solutions
+        return
+
+    def plot_solutions(self, refined = False):
+        plt.figure()
+        cont = True
+        if refined:
+            sols = self.refined_solutions
+        else:
+            sols = self.solutions
+        for s in sols:
             p = s[0]
             for v in s[1]:
                 stab = self.problem.stability(v,p)
