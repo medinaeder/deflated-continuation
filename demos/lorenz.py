@@ -54,7 +54,7 @@ class Lorenz:
         return max(e)
 
     def initial_guess(self):
-        return [np.ones(3)*1e-3, np.ones(3)*-1e-3]
+        return [np.ones(3)*1e-8, np.ones(3)*-1e-8]
 
     def functional(self,u):
         return u[0]

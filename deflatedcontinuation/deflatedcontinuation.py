@@ -2,6 +2,8 @@ import numpy as np
 import scipy.optimize 
 import matplotlib.pyplot as plt
 
+from .newtonsolver import newtonsolver, newtonsolver1d
+
 class DeflatedContinuation:
     def __init__(self,problem, params, has_trivial = True, tol = 1e-6):
         self.problem = problem
@@ -13,6 +15,10 @@ class DeflatedContinuation:
 
     def run(self):
         problem = self.problem
+        if problem.dim==1:
+            newtonsolve = newtonsolver1d
+        else:
+            newtonsolve = newtonsolver
         # What is the structure of the solutions
         solutions = []
         
@@ -35,19 +41,21 @@ class DeflatedContinuation:
             # Continuation Step
             for x in x0:
                 if self.has_trivial:
-                    xn = scipy.optimize.root(self.deflate, x, jac = self.deflate_jacobian, args = (p,[],), tol = self.tol)
+                    #xn = scipy.optimize.root(self.deflate, x, jac = self.deflate_jacobian, args = (p,[],), tol=self.tol, method = 'krylov')
+                    xn = newtonsolve(self.deflate, x, jac = self.deflate_jacobian, args = (p,[],), atol=self.tol)
                 else:
-                    xn = scipy.optimize.root(problem.residual, x,jac = self.problem.jacobian,  args = (p,), tol = self.tol)
+                    #xn = scipy.optimize.root(problem.residual, x,jac = self.problem.jacobian,  args = (p,) tol=self.tol)
+                    xn = newtonsolve(problem.residual, x,jac = self.problem.jacobian,  args = (p,), atol=self.tol)
                 if xn.success:
                     xnew.append(xn.x)
 
             # Branch Discovery Step
             num_sols = len(x0)
-            
             for i in range(num_sols):
                 discovered = True
                 while discovered:
-                    xn = scipy.optimize.root(self.deflate, x0[i], jac = self.deflate_jacobian,  args = (p,xnew,), tol = self.tol)
+                    #xn = scipy.optimize.root(self.deflate, x0[i], jac = self.deflate_jacobian,  args = (p,xnew,), tol=self.tol, method = 'krylov')
+                    xn = newtonsolve(self.deflate, x0[i], jac = self.deflate_jacobian,  args = (p,xnew,),atol=self.tol, max_it=20)
                     if xn.success:
                         xnew.append(xn.x)
                     else: 
@@ -123,8 +131,7 @@ class DeflatedContinuation:
             p = s[0] 
             new_set = []
             for x in s[1]:
-                xn = scipy.optimize.root(self.problem.residual, x, jac = self.problem.jacobian,  args = (p,), tol =
-self.tol*1e-2)
+                xn = newtonsolve(self.problem.residual, x,jac = self.problem.jacobian,  args = (p,), atol=self.tol)
                 if xn.success:
                     new_set.append(xn.x)
             refined_solutions.append([p,new_set])
@@ -133,7 +140,7 @@ self.tol*1e-2)
 
     def plot_solutions(self, refined = False):
         plt.figure()
-        cont = True
+        cont = False
         if refined:
             sols = self.refined_solutions
         else:

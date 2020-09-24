@@ -46,30 +46,33 @@ def run_perfect():
     
     problem = Lorenz([10, 8./3])
     params = np.linspace(0.1, 30, 101)
-    df = DeflatedContinuation(problem,params,True, 1e-4)
+    #params = np.linspace(1.1,1.2, 2)
+    df = DeflatedContinuation(problem,params, True, 1e-8)
     df.run()
-    print("refining")
-    df.refine()
-    import IPython; IPython.embed()
-    df.plot_solutions(True)
+    #print("refining")
+    #df.refine()
+    #import IPython; IPython.embed()
+    df.plot_solutions(False)
+    #plt.show()
+    #import sys; sys.exit()
     
 
     problem = Transcritical([1.,0])
     params = np.linspace(-1, 2,101)
-    df = DeflatedContinuation(problem,params,True)
+    df = DeflatedContinuation(problem,params,True, 1e-6)
     df.run()
     df.plot_solutions()
 
 
     problem = Pitchfork([1.,0])
     params = np.linspace(-1,2,101)
-    df = DeflatedContinuation(problem,np.flip(params),True)
+    df = DeflatedContinuation(problem,np.flip(params),True, 1e-6)
     df.run()
     df.plot_solutions()
 
     problem = Saddle()
     params = np.linspace(-1,2,101)
-    df = DeflatedContinuation(problem,params,False)
+    df = DeflatedContinuation(problem,params,False, 1e-6)
     df.run()
     df.plot_solutions()
 
@@ -77,5 +80,5 @@ def run_perfect():
     return
 
 if __name__ == "__main__":
-    run_perfect()
-    #run_perturbed(1e-1)
+    #run_perfect()
+    run_perturbed(1e-5)

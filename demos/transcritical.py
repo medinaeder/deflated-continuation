@@ -27,7 +27,7 @@ class Transcritical:
         return self.jacobian(u,p)
 
     def initial_guess(self):
-        return [np.array(0.01)]
+        return [np.array(0.1e-6)]
     
     def functional(self,u):
         return u
